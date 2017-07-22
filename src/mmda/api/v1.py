@@ -4,7 +4,7 @@ from flask import Blueprint, g, jsonify
 import requests
 
 from mmda import config
-from mmda.utils import parse_mmda_rss
+from mmda.models import Feed
 
 
 blueprint = Blueprint('v1', __name__)
@@ -14,10 +14,7 @@ def load_mmda_api(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         response = requests.get(config.MMDA_API_URL)
-        g.mmda = {
-            'status_code': response.status_code,
-            'data': parse_mmda_rss(response.content)
-        }
+        g.feed = Feed(response.content)
         return func(*args, **kwargs)
     return wrapper
 
@@ -33,4 +30,4 @@ def index():
 @blueprint.route('/feed')
 @load_mmda_api
 def feed():
-    return jsonify(g.mmda.get('data'))
+    return jsonify(g.feed.items())
