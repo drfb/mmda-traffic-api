@@ -20,6 +20,28 @@ def load_mmda_api(func):
     return wrapper
 
 
+def validate_highway(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        highway_id = kwargs.get('highway_id')
+        g.highway = g.feed.get_highway(highway_id)
+        if not g.highway:
+            raise ResourceNotFound('Highway')
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def validate_segment(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        segment_id = kwargs.get('segment_id')
+        g.segment = g.feed.get_segment(segment_id)
+        if not g.segment:
+            raise ResourceNotFound('Segment')
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @blueprint.errorhandler(ResourceNotFound)
 def handle_resource_error(error):
     return jsonify(error='{} not found.'.format(error.resource)), 404
@@ -47,26 +69,20 @@ def highways():
 
 @blueprint.route('/highways/<highway_id>/traffic')
 @load_mmda_api
+@validate_highway
 def highway_traffic(highway_id):
-    highway = g.feed.get_highway(highway_id)
-    if not highway:
-        raise ResourceNotFound('Highway')
-    return jsonify(g.feed.traffic(highway=highway))
+    return jsonify(g.feed.traffic(highway=g.highway))
 
 
 @blueprint.route('/highways/<highway_id>/segments')
 @load_mmda_api
+@validate_highway
 def segments(highway_id):
-    highway = g.feed.get_highway(highway_id)
-    if not highway:
-        raise ResourceNotFound('Highway')
-    return jsonify(g.feed.segments(highway))
+    return jsonify(g.feed.segments(g.highway))
 
 
 @blueprint.route('/segments/<segment_id>/traffic')
 @load_mmda_api
+@validate_segment
 def segment_traffic(segment_id):
-    segment = g.feed.get_segment(segment_id)
-    if not segment:
-        raise ResourceNotFound('Segment')
-    return jsonify(g.feed.traffic(segment=segment))
+    return jsonify(g.feed.traffic(segment=g.segment))
