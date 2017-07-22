@@ -92,6 +92,14 @@ def highway_traffic(highway_id):
     return jsonify(g.feed.traffic(highway=g.highway))
 
 
+@blueprint.route('/highways/<highway_id>/traffic/<direction>')
+@load_mmda_api
+@validate_highway
+@validate_direction
+def highway_traffic_in_on_direction(highway_id, direction):
+    return jsonify(g.feed.traffic(highway=g.highway, direction=g.direction))
+
+
 @blueprint.route('/highways/<highway_id>/segments')
 @load_mmda_api
 @validate_highway

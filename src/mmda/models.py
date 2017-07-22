@@ -75,9 +75,18 @@ class Feed:
         }
         return statuses.get(status)
 
+    def _filter_traffic_in_one_direction(self, segments, direction):
+        for key, segment in segments.items():
+            traffic = segment.get('traffic')
+            traffic_in_one_direction = traffic.get(direction)
+            segment['traffic'] = traffic_in_one_direction
+
     def traffic(self, highway=None, segment=None, direction=None):
         if highway:
-            return highway.get('segments')
+            segments = highway.get('segments')
+            if direction:
+                self._filter_traffic_in_one_direction(segments, direction)
+            return segments
         elif segment:
             traffic = segment.get('traffic')
             if direction:
@@ -86,10 +95,8 @@ class Feed:
         elif direction:
             data = self.data.copy()
             for key, highway in data.items():
-                for key, segment in highway.get('segments').items():
-                    traffic = segment.get('traffic')
-                    traffic_in_one_direction = traffic.get(direction)
-                    segment['traffic'] = traffic_in_one_direction
+                segments = highway.get('segments')
+                self._filter_traffic_in_one_direction(segments, direction)
             return data
         return self.data
 
