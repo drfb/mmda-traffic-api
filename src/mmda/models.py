@@ -18,14 +18,14 @@ class Feed:
             _highway = self.traffic.get(highway)
             if not _highway:
                 self.traffic[highway] = _highway = {
-                    'label': highway,
+                    'label': self._parse_name(highway),
                     'segments': {},
                 }
 
             _segment = _highway.get('segments').get(segment)
             if not _segment:
                 _highway.get('segments')[segment] = _segment = {
-                    'label': segment,
+                    'label': self._parse_name(segment),
                     'traffic': {},
                 }
 
@@ -39,6 +39,16 @@ class Feed:
     def _parse_title(self, title):
         parts = title.split('-')
         return parts[0], parts[1], parts[2]
+
+    def _parse_name(self, name):
+        name = name.replace('_', ' ')
+        name = name.replace('AVE.', 'Avenue')
+        name = name.replace('BLVD.', 'Boulevard')
+
+        if name not in ['EDSA', 'U.N.']:
+            name = name.title()
+
+        return name
 
     def _parse_direction(self, direction):
         directions = {
