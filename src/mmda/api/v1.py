@@ -2,8 +2,8 @@ from flask import Blueprint, g, jsonify
 
 from mmda.exceptions import ResourceNotFound
 from mmda.decorators import (
-    load_mmda_api, validate_highway,
-    validate_segment, validate_direction,
+    load_mmda_api, validate_highway, validate_segment,
+    validate_direction, validate_status,
 )
 
 
@@ -76,6 +76,19 @@ def highway_traffic_in_on_direction(highway_id, direction):
 def segments(highway_id):
     return jsonify(
         g.feed.segments(g.highway)
+    )
+
+
+@blueprint.route('/highways/<highway_id>/segments/<status>')
+@load_mmda_api
+@validate_highway
+@validate_status
+def highway_segments_filtered_by_traffic_status(highway_id, status):
+    return jsonify(
+        g.feed.get_segments_by_highway_and_status(
+            highway=g.highway,
+            status=g.status
+        )
     )
 
 

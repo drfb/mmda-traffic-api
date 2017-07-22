@@ -127,3 +127,24 @@ class Feed:
             segments = highway.get('segments')
             if segment_id in segments.keys():
                 return segments.get(segment_id)
+
+    def get_segments_by_highway_and_status(self, highway, status):
+        status = self._parse_status(status)
+        segments = highway.get('segments')
+        filtered_segments = {}
+
+        for key, segment in segments.items():
+            traffic = segment.get('traffic')
+            directions = ['NB', 'SB']
+            filtered_traffic = {}
+
+            for direction in directions:
+                traffic_direction = traffic.get(direction)
+                if traffic_direction.get('status') == status:
+                    filtered_traffic[direction] = traffic_direction
+
+            if filtered_traffic:
+                segment['traffic'] = filtered_traffic
+                filtered_segments[key] = segment
+
+        return filtered_segments
