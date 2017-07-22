@@ -33,7 +33,11 @@ def traffic():
 @load_mmda_api
 @validate_direction
 def traffic_in_one_direction(direction):
-    return jsonify(g.feed.traffic(direction=g.direction))
+    return jsonify(
+        g.feed.traffic(
+            direction=g.direction
+        )
+    )
 
 
 @blueprint.route('/highways')
@@ -46,7 +50,11 @@ def highways():
 @load_mmda_api
 @validate_highway
 def highway_traffic(highway_id):
-    return jsonify(g.feed.traffic(highway=g.highway))
+    return jsonify(
+        g.feed.traffic(
+            highway=g.highway
+        )
+    )
 
 
 @blueprint.route('/highways/<highway_id>/traffic/<direction>')
@@ -54,21 +62,32 @@ def highway_traffic(highway_id):
 @validate_highway
 @validate_direction
 def highway_traffic_in_on_direction(highway_id, direction):
-    return jsonify(g.feed.traffic(highway=g.highway, direction=g.direction))
+    return jsonify(
+        g.feed.traffic(
+            highway=g.highway,
+            direction=g.direction
+        )
+    )
 
 
 @blueprint.route('/highways/<highway_id>/segments')
 @load_mmda_api
 @validate_highway
 def segments(highway_id):
-    return jsonify(g.feed.segments(g.highway))
+    return jsonify(
+        g.feed.segments(g.highway)
+    )
 
 
 @blueprint.route('/segments/<segment_id>/traffic')
 @load_mmda_api
 @validate_segment
 def segment_traffic(segment_id):
-    return jsonify(g.feed.traffic(segment=g.segment))
+    return jsonify(
+        g.feed.traffic(
+            segment=g.segment
+        )
+    )
 
 
 @blueprint.route('/segments/<segment_id>/traffic/<direction>')
@@ -76,4 +95,9 @@ def segment_traffic(segment_id):
 @validate_segment
 @validate_direction
 def segment_traffic_in_one_direction(segment_id, direction):
-    return jsonify(g.feed.traffic(segment=g.segment, direction=g.direction))
+    return jsonify(
+        g.feed.traffic(
+            segment=g.segment,
+            direction=g.direction
+        )
+    )
