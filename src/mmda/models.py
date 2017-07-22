@@ -2,7 +2,7 @@ from xml.etree import ElementTree
 
 
 class Feed:
-    traffic = {}
+    data = {}
 
     def __init__(self, content):
         root = ElementTree.fromstring(content)
@@ -18,9 +18,9 @@ class Feed:
         pub_date = item.find('pubDate').text
         highway_key, segment_key, direction_key = self._parse_title(title)
 
-        highway = self.traffic.get(highway_key)
+        highway = self.data.get(highway_key)
         if not highway:
-            self.traffic[highway_key] = highway = {
+            self.data[highway_key] = highway = {
                 'label': self._parse_name(highway_key),
                 'segments': {},
             }
@@ -77,10 +77,10 @@ class Feed:
         return statuses.get(status)
 
     def items(self):
-        return [self.traffic]
+        return [self.data]
 
     def highways(self):
-        highway_keys = self.traffic.keys()
+        highway_keys = self.data.keys()
         highways = []
         for key in highway_keys:
             highways.append({
@@ -90,7 +90,7 @@ class Feed:
         return highways
 
     def get_highway(self, highway_id):
-        return self.traffic.get(highway_id)
+        return self.data.get(highway_id)
 
     def segments(self, highway):
         segments = []
