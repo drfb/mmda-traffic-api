@@ -38,7 +38,13 @@ class Feed:
 
     def _parse_title(self, title):
         parts = title.split('-')
-        return parts[0], parts[1], parts[2]
+        last_index = len(parts) - 1
+
+        highway = parts[0]
+        segment = '-'.join(parts[1:last_index])
+        direction = parts[last_index]
+
+        return highway, segment, direction
 
     def _parse_name(self, name):
         name = name.replace('_', ' ')
