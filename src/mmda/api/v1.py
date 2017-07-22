@@ -25,5 +25,6 @@ def load_mmda_api(func):
 @blueprint.route('/')
 def index():
     return jsonify(
-        app_name='MMDA Traffic API v1',
+        name='TV5-MMDA Traffic Monitoring API',
+        version='v1',
     )
