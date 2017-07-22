@@ -128,6 +128,15 @@ class Feed:
     def get_highway(self, highway_id):
         return self.data.get(highway_id)
 
+    def get_segments(self):
+        segments = {}
+
+        for highway_key, highway in self.data.items():
+            for segment_key, segment in highway.get('segments').items():
+                segments[segment_key] = self._parse_name(segment_key)
+
+        return segments
+
     def get_segments_by_highway(self, highway):
         segments = {}
 

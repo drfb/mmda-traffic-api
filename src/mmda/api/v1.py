@@ -29,6 +29,12 @@ def highways():
     return jsonify(g.feed.get_highways())
 
 
+@blueprint.route('/segments')
+@load_mmda_api
+def segments():
+    return jsonify(g.feed.get_segments())
+
+
 @blueprint.route('/highways/<highway_id>/segments')
 @load_mmda_api
 @validate_highway
