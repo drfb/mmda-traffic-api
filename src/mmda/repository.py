@@ -65,6 +65,13 @@ class Feed:
         }
         return directions.get(direction)
 
+    def _get_opposite_direction(self, direction):
+        opposite_directions = {
+            'NB': 'SB',
+            'SB': 'NB',
+        }
+        return opposite_directions.get(direction)
+
     def _parse_status(self, status):
         statuses = {
             'L': 'Light',
@@ -75,51 +82,58 @@ class Feed:
         }
         return statuses.get(status)
 
-    def _filter_traffic_in_one_direction(self, segments, direction):
+    def _filter_segment_by(self, segment, direction=None, status=None):
+        if direction:
+            opposite_direction = self._get_opposite_direction(direction)
+            traffic = segment.get('traffic')
+            traffic.pop(opposite_direction)
+
+        if status:
+            status = self._parse_status(status)
+            traffic = segment.get('traffic')
+            directions = ['NB', 'SB']
+            filtered_traffic = {}
+
+            for direction in directions:
+                traffic_direction = traffic.get(direction, {})
+
+                if traffic_direction.get('status') == status:
+                    filtered_traffic[direction] = traffic_direction
+
+            if filtered_traffic:
+                segment['traffic'] = filtered_traffic
+            else:
+                return None
+
+        return segment
+
+    def _filter_segments_by(self, segments, direction=None, status=None):
         for key, segment in segments.items():
-            traffic = segment.get('traffic')
-            traffic_in_one_direction = traffic.get(direction)
-            segment['traffic'] = traffic_in_one_direction
+            if not self._filter_segment_by(
+                segment,
+                direction=direction,
+                status=status
+            ):
+                del segments[key]
 
-    def traffic(self, highway=None, segment=None, direction=None):
-        if highway:
-            segments = highway.get('segments')
-            if direction:
-                self._filter_traffic_in_one_direction(segments, direction)
-            return segments
-        elif segment:
-            traffic = segment.get('traffic')
-            if direction:
-                return traffic.get(direction)
-            return traffic
-        elif direction:
-            data = self.data.copy()
-            for key, highway in data.items():
-                segments = highway.get('segments')
-                self._filter_traffic_in_one_direction(segments, direction)
-            return data
-        return self.data
-
-    def highways(self):
+    def get_highways(self):
         highway_keys = self.data.keys()
-        highways = []
+        highways = {}
+
         for key in highway_keys:
-            highways.append({
-                'id': key,
-                'label': self._parse_name(key),
-            })
+            highways[key] = self._parse_name(key)
+
         return highways
 
     def get_highway(self, highway_id):
         return self.data.get(highway_id)
 
-    def segments(self, highway):
-        segments = []
+    def get_segments_by_highway(self, highway):
+        segments = {}
+
         for key, segment in highway.get('segments').items():
-            segments.append({
-                'id': key,
-                'label': self._parse_name(key),
-            })
+            segments[key] = self._parse_name(key)
+
         return segments
 
     def get_segment(self, segment_id):
@@ -128,23 +142,48 @@ class Feed:
             if segment_id in segments.keys():
                 return segments.get(segment_id)
 
-    def get_segments_by_highway_and_status(self, highway, status):
-        status = self._parse_status(status)
-        segments = highway.get('segments')
-        filtered_segments = {}
+    def get_traffic(self, filters=None):
+        traffic = self.data
 
-        for key, segment in segments.items():
-            traffic = segment.get('traffic')
-            directions = ['NB', 'SB']
-            filtered_traffic = {}
+        if filters:
+            direction = filters.get('direction')
+            status = filters.get('status')
 
-            for direction in directions:
-                traffic_direction = traffic.get(direction)
-                if traffic_direction.get('status') == status:
-                    filtered_traffic[direction] = traffic_direction
+            for key, highway in traffic.items():
+                segments = highway.get('segments')
+                self._filter_segments_by(
+                    segments,
+                    direction=direction,
+                    status=status
+                )
 
-            if filtered_traffic:
-                segment['traffic'] = filtered_traffic
-                filtered_segments[key] = segment
+        return traffic
 
-        return filtered_segments
+    def get_traffic_by_highway(self, highway, filters=None):
+        if filters:
+            direction = filters.get('direction')
+            status = filters.get('status')
+
+            segments = highway.get('segments')
+            if not self._filter_segments_by(
+                segments,
+                direction=direction,
+                status=status
+            ):
+                return {}
+
+        return highway
+
+    def get_traffic_by_segment(self, segment, filters=None):
+        if filters:
+            direction = filters.get('direction')
+            status = filters.get('status')
+
+            if not self._filter_segment_by(
+                segment,
+                direction=direction,
+                status=status
+            ):
+                return {}
+
+        return segment

@@ -2,8 +2,8 @@ from flask import Blueprint, g, jsonify
 
 from mmda.exceptions import ResourceNotFound
 from mmda.decorators import (
-    load_mmda_api, validate_highway, validate_segment,
-    validate_direction, validate_status,
+    load_mmda_api, validate_highway,
+    validate_segment, validate_filters,
 )
 
 
@@ -23,71 +23,39 @@ def index():
     )
 
 
-@blueprint.route('/traffic')
-@load_mmda_api
-def traffic():
-    return jsonify(g.feed.traffic())
-
-
-@blueprint.route('/traffic/<direction>')
-@load_mmda_api
-@validate_direction
-def traffic_in_one_direction(direction):
-    return jsonify(
-        g.feed.traffic(
-            direction=g.direction
-        )
-    )
-
-
 @blueprint.route('/highways')
 @load_mmda_api
 def highways():
-    return jsonify(g.feed.highways())
-
-
-@blueprint.route('/highways/<highway_id>/traffic')
-@load_mmda_api
-@validate_highway
-def highway_traffic(highway_id):
-    return jsonify(
-        g.feed.traffic(
-            highway=g.highway
-        )
-    )
-
-
-@blueprint.route('/highways/<highway_id>/traffic/<direction>')
-@load_mmda_api
-@validate_highway
-@validate_direction
-def highway_traffic_in_on_direction(highway_id, direction):
-    return jsonify(
-        g.feed.traffic(
-            highway=g.highway,
-            direction=g.direction
-        )
-    )
+    return jsonify(g.feed.get_highways())
 
 
 @blueprint.route('/highways/<highway_id>/segments')
 @load_mmda_api
 @validate_highway
-def segments(highway_id):
+def highway_segments(highway_id):
     return jsonify(
-        g.feed.segments(g.highway)
+        g.feed.get_segments_by_highway(g.highway)
     )
 
 
-@blueprint.route('/highways/<highway_id>/segments/<status>')
+@blueprint.route('/traffic')
+@load_mmda_api
+@validate_filters
+def traffic():
+    return jsonify(
+        g.feed.get_traffic(filters=g.filters)
+    )
+
+
+@blueprint.route('/highways/<highway_id>/traffic')
 @load_mmda_api
 @validate_highway
-@validate_status
-def highway_segments_filtered_by_traffic_status(highway_id, status):
+@validate_filters
+def highway_traffic(highway_id):
     return jsonify(
-        g.feed.get_segments_by_highway_and_status(
-            highway=g.highway,
-            status=g.status
+        g.feed.get_traffic_by_highway(
+            g.highway,
+            filters=g.filters
         )
     )
 
@@ -95,22 +63,11 @@ def highway_segments_filtered_by_traffic_status(highway_id, status):
 @blueprint.route('/segments/<segment_id>/traffic')
 @load_mmda_api
 @validate_segment
+@validate_filters
 def segment_traffic(segment_id):
     return jsonify(
-        g.feed.traffic(
-            segment=g.segment
-        )
-    )
-
-
-@blueprint.route('/segments/<segment_id>/traffic/<direction>')
-@load_mmda_api
-@validate_segment
-@validate_direction
-def segment_traffic_in_one_direction(segment_id, direction):
-    return jsonify(
-        g.feed.traffic(
-            segment=g.segment,
-            direction=g.direction
+        g.feed.get_traffic_by_segment(
+            g.segment,
+            filters=g.filters
         )
     )

@@ -1,6 +1,6 @@
 from functools import wraps
 
-from flask import g
+from flask import g, request
 import requests
 
 from mmda import config
@@ -22,8 +22,10 @@ def validate_highway(func):
     def wrapper(*args, **kwargs):
         highway_id = kwargs.get('highway_id')
         g.highway = g.feed.get_highway(highway_id)
+
         if not g.highway:
             raise ResourceNotFound('Highway')
+
         return func(*args, **kwargs)
     return wrapper
 
@@ -33,29 +35,38 @@ def validate_segment(func):
     def wrapper(*args, **kwargs):
         segment_id = kwargs.get('segment_id')
         g.segment = g.feed.get_segment(segment_id)
+
         if not g.segment:
             raise ResourceNotFound('Segment')
+
         return func(*args, **kwargs)
     return wrapper
 
 
-def validate_direction(func):
+def validate_filters(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        directions = ['NB', 'SB']
-        g.direction = kwargs.get('direction').upper()
-        if g.direction not in directions:
-            raise ResourceNotFound('Direction')
-        return func(*args, **kwargs)
-    return wrapper
+        filters = {}
+        direction = request.args.get('direction')
+        status = request.args.get('status')
 
+        if direction:
+            direction = direction.upper()
 
-def validate_status(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        statuses = ['L', 'ML', 'M', 'MH', 'H']
-        g.status = kwargs.get('status').upper()
-        if g.status not in statuses:
-            raise ResourceNotFound('Status')
+            if direction not in ['NB', 'SB']:
+                raise ResourceNotFound('Direction')
+
+            filters['direction'] = direction
+
+        if status:
+            status = status.upper()
+
+            if status and status not in ['L', 'ML', 'M', 'MH', 'H']:
+                raise ResourceNotFound('Status')
+
+            filters['status'] = status
+
+        g.filters = filters
+
         return func(*args, **kwargs)
     return wrapper
