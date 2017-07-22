@@ -33,10 +33,10 @@ def index():
     )
 
 
-@blueprint.route('/feed')
+@blueprint.route('/traffic')
 @load_mmda_api
-def feed():
-    return jsonify(g.feed.items())
+def traffic():
+    return jsonify(g.feed.traffic())
 
 
 @blueprint.route('/highways')
@@ -65,7 +65,7 @@ def segments(highway_id):
 
 @blueprint.route('/segments/<segment_id>/traffic')
 @load_mmda_api
-def traffic(segment_id):
+def segment_traffic(segment_id):
     segment = g.feed.get_segment(segment_id)
     if not segment:
         raise ResourceNotFound('Segment')

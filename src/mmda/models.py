@@ -76,14 +76,12 @@ class Feed:
         }
         return statuses.get(status)
 
-    def items(self):
-        return [self.data]
-
     def traffic(self, highway=None, segment=None):
         if highway:
             return highway.get('segments')
         elif segment:
             return segment.get('traffic')
+        return self.data
 
     def highways(self):
         highway_keys = self.data.keys()
