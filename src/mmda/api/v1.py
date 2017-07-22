@@ -72,6 +72,13 @@ def traffic():
     return jsonify(g.feed.traffic())
 
 
+@blueprint.route('/traffic/<direction>')
+@load_mmda_api
+@validate_direction
+def traffic_in_one_direction(direction):
+    return jsonify(g.feed.traffic(direction=g.direction))
+
+
 @blueprint.route('/highways')
 @load_mmda_api
 def highways():

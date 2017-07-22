@@ -84,6 +84,14 @@ class Feed:
             if direction:
                 return traffic.get(direction)
             return traffic
+        elif direction:
+            data = self.data.copy()
+            for key, highway in data.items():
+                for key, segment in highway.get('segments').items():
+                    traffic = segment.get('traffic')
+                    traffic_in_one_direction = traffic.get(direction)
+                    segment['traffic'] = traffic_in_one_direction
+            return data
         return self.data
 
     def highways(self):
