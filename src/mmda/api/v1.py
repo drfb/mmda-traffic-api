@@ -4,7 +4,7 @@ from flask import Blueprint, g, jsonify
 import requests
 
 from mmda import config
-from mmda.models import Feed
+from mmda.repository import Feed
 from mmda.exceptions import ResourceNotFound
 
 
