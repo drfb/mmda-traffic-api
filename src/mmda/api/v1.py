@@ -28,3 +28,9 @@ def index():
         name='TV5-MMDA Traffic Monitoring API',
         version='v1',
     )
+
+
+@blueprint.route('/feed')
+@load_mmda_api
+def feed():
+    return jsonify(g.mmda.get('data'))
