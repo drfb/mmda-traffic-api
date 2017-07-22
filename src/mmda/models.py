@@ -88,3 +88,15 @@ class Feed:
                 'label': self._parse_name(key),
             })
         return highways
+
+    def get_highway(self, highway_id):
+        return self.traffic.get(highway_id)
+
+    def segments(self, highway):
+        segments = []
+        for key, segment in highway.get('segments').items():
+            segments.append({
+                'id': key,
+                'label': self._parse_name(key),
+            })
+        return segments
