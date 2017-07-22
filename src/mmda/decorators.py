@@ -48,3 +48,14 @@ def validate_direction(func):
             raise ResourceNotFound('Direction')
         return func(*args, **kwargs)
     return wrapper
+
+
+def validate_status(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        statuses = ['L', 'ML', 'M', 'MH', 'H']
+        g.status = kwargs.get('status').upper()
+        if g.status not in statuses:
+            raise ResourceNotFound('Status')
+        return func(*args, **kwargs)
+    return wrapper
