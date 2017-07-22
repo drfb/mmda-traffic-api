@@ -79,6 +79,12 @@ class Feed:
     def items(self):
         return [self.data]
 
+    def traffic(self, highway=None, segment=None):
+        if highway:
+            return highway.get('segments')
+        elif segment:
+            return segment.get('traffic')
+
     def highways(self):
         highway_keys = self.data.keys()
         highways = []
@@ -106,6 +112,3 @@ class Feed:
             segments = highway.get('segments')
             if segment_id in segments.keys():
                 return segments.get(segment_id)
-
-    def get_traffic(self, segment):
-        return segment.get('traffic')
