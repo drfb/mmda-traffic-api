@@ -31,7 +31,7 @@ class Feed:
 
             traffic = _segment.get('traffic')
             traffic[direction] = {
-                'label': direction,
+                'label': self._parse_direction(direction),
                 'status': self._parse_status(description),
                 'updated_at': pub_date,
             }
@@ -39,6 +39,13 @@ class Feed:
     def _parse_title(self, title):
         parts = title.split('-')
         return parts[0], parts[1], parts[2]
+
+    def _parse_direction(self, direction):
+        directions = {
+            'NB': 'Northbound',
+            'SB': 'Southbound',
+        }
+        return directions.get(direction)
 
     def _parse_status(self, status):
         statuses = {
