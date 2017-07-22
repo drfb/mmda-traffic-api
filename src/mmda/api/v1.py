@@ -31,3 +31,9 @@ def index():
 @load_mmda_api
 def feed():
     return jsonify(g.feed.items())
+
+
+@blueprint.route('/highways')
+@load_mmda_api
+def highways():
+    return jsonify(g.feed.highways())

@@ -78,3 +78,13 @@ class Feed:
 
     def items(self):
         return [self.traffic]
+
+    def highways(self):
+        highway_keys = self.traffic.keys()
+        highways = []
+        for key in highway_keys:
+            highways.append({
+                'id': key,
+                'label': self._parse_name(key),
+            })
+        return highways
