@@ -2,9 +2,8 @@ from xml.etree import ElementTree
 
 
 class Feed:
-    data = {}
-
     def __init__(self, content):
+        self.data = {}
         root = ElementTree.fromstring(content)
         channel = root.find('channel')
         items = channel.findall('item')
