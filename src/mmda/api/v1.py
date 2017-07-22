@@ -52,3 +52,12 @@ def segments(highway_id):
     if not highway:
         raise ResourceNotFound('Highway')
     return jsonify(g.feed.segments(highway))
+
+
+@blueprint.route('/segments/<segment_id>/traffic')
+@load_mmda_api
+def traffic(segment_id):
+    segment = g.feed.get_segment(segment_id)
+    if not segment:
+        raise ResourceNotFound('Segment')
+    return jsonify(g.feed.get_traffic(segment))

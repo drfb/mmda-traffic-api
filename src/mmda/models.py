@@ -100,3 +100,12 @@ class Feed:
                 'label': self._parse_name(key),
             })
         return segments
+
+    def get_segment(self, segment_id):
+        for key, highway in self.data.items():
+            segments = highway.get('segments')
+            if segment_id in segments.keys():
+                return segments.get(segment_id)
+
+    def get_traffic(self, segment):
+        return segment.get('traffic')
