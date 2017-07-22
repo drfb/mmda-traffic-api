@@ -76,11 +76,14 @@ class Feed:
         }
         return statuses.get(status)
 
-    def traffic(self, highway=None, segment=None):
+    def traffic(self, highway=None, segment=None, direction=None):
         if highway:
             return highway.get('segments')
         elif segment:
-            return segment.get('traffic')
+            traffic = segment.get('traffic')
+            if direction:
+                return traffic.get(direction)
+            return traffic
         return self.data
 
     def highways(self):

@@ -42,6 +42,17 @@ def validate_segment(func):
     return wrapper
 
 
+def validate_direction(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        directions = ['NB', 'SB']
+        g.direction = kwargs.get('direction').upper()
+        if g.direction not in directions:
+            raise ResourceNotFound('Direction')
+        return func(*args, **kwargs)
+    return wrapper
+
+
 @blueprint.errorhandler(ResourceNotFound)
 def handle_resource_error(error):
     return jsonify(error='{} not found.'.format(error.resource)), 404
@@ -86,3 +97,11 @@ def segments(highway_id):
 @validate_segment
 def segment_traffic(segment_id):
     return jsonify(g.feed.traffic(segment=g.segment))
+
+
+@blueprint.route('/segments/<segment_id>/traffic/<direction>')
+@load_mmda_api
+@validate_segment
+@validate_direction
+def segment_traffic_in_one_direction(segment_id, direction):
+    return jsonify(g.feed.traffic(segment=g.segment, direction=g.direction))
