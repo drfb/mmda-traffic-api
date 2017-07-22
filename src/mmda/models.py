@@ -10,31 +10,34 @@ class Feed:
         items = channel.findall('item')
 
         for item in items:
-            title = item.find('title').text
-            description = item.find('description').text
-            pub_date = item.find('pubDate').text
-            highway, segment, direction = self._parse_title(title)
+            self._parse_item(item)
 
-            _highway = self.traffic.get(highway)
-            if not _highway:
-                self.traffic[highway] = _highway = {
-                    'label': self._parse_name(highway),
-                    'segments': {},
-                }
+    def _parse_item(self, item):
+        title = item.find('title').text
+        description = item.find('description').text
+        pub_date = item.find('pubDate').text
+        highway_key, segment_key, direction_key = self._parse_title(title)
 
-            _segment = _highway.get('segments').get(segment)
-            if not _segment:
-                _highway.get('segments')[segment] = _segment = {
-                    'label': self._parse_name(segment),
-                    'traffic': {},
-                }
-
-            traffic = _segment.get('traffic')
-            traffic[direction] = {
-                'label': self._parse_direction(direction),
-                'status': self._parse_status(description),
-                'updated_at': pub_date,
+        highway = self.traffic.get(highway_key)
+        if not highway:
+            self.traffic[highway_key] = highway = {
+                'label': self._parse_name(highway_key),
+                'segments': {},
             }
+
+        segment = highway.get('segments').get(segment_key)
+        if not segment:
+            highway.get('segments')[segment_key] = segment = {
+                'label': self._parse_name(segment_key),
+                'traffic': {},
+            }
+
+        traffic = segment.get('traffic')
+        traffic[direction_key] = {
+            'label': self._parse_direction(direction_key),
+            'status': self._parse_status(description),
+            'updated_at': pub_date,
+        }
 
     def _parse_title(self, title):
         parts = title.split('-')
