@@ -13,7 +13,7 @@ class Feed:
         """
         Parses content (xml string) from traffic feed API.
         """
-        self.data = {}
+        self.data = []
         root = ElementTree.fromstring(content)
         channel = root.find('channel')
         items = channel.findall('item')
@@ -32,20 +32,24 @@ class Feed:
         highway_key, segment_key, direction_key = self._parse_title(title)
 
         # Parse highway
-        highway = self.data.get(highway_key)
+        highway = self.get_highway(highway_key)
         if not highway:
-            self.data[highway_key] = highway = {
+            highway = {
+                'id': highway_key,
                 'label': self._parse_name(highway_key),
-                'segments': {},
+                'segments': [],
             }
+            self.data.append(highway)
 
         # Parse highway segment
-        segment = highway.get('segments').get(segment_key)
+        segment = self.get_segment(segment_key)
         if not segment:
-            highway.get('segments')[segment_key] = segment = {
+            segment = {
+                'id': segment_key,
                 'label': self._parse_name(segment_key),
                 'traffic': {},
             }
+            highway.get('segments').append(segment)
 
         # Parse traffic direction and data
         traffic = segment.get('traffic')
@@ -155,11 +159,13 @@ class Feed:
         """
         Lists all monitored highways.
         """
-        highway_keys = self.data.keys()
-        highways = {}
+        highways = []
 
-        for key in highway_keys:
-            highways[key] = self._parse_name(key)
+        for highway in self.data:
+            highways.append({
+                'id': highway.get('id'),
+                'label': highway.get('label'),
+            })
 
         return highways
 
@@ -167,17 +173,22 @@ class Feed:
         """
         Returns a specific highway by highway_id.
         """
-        return self.data.get(highway_id)
+        for highway in self.data:
+            if highway.get('id') == highway_id:
+                return highway
 
     def get_segments(self):
         """
         Lists all monitored highway segments.
         """
-        segments = {}
+        segments = []
 
-        for highway_key, highway in self.data.items():
-            for segment_key, segment in highway.get('segments').items():
-                segments[segment_key] = self._parse_name(segment_key)
+        for highway in self.data:
+            for segment in highway.get('segments'):
+                segments.append({
+                    'id': segment.get('id'),
+                    'label': segment.get('label'),
+                })
 
         return segments
 
@@ -186,10 +197,13 @@ class Feed:
         Lists all monitered segments in
         a given highway.
         """
-        segments = {}
+        segments = []
 
-        for key, segment in highway.get('segments').items():
-            segments[key] = self._parse_name(key)
+        for segment in highway.get('segments'):
+            segments.append({
+                'id': segment.get('id'),
+                'label': segment.get('label'),
+            })
 
         return segments
 
@@ -198,10 +212,12 @@ class Feed:
         Returns a specific highway segment
         by segment_id.
         """
-        for key, highway in self.data.items():
+        for highway in self.data:
             segments = highway.get('segments')
-            if segment_id in segments.keys():
-                return segments.get(segment_id)
+
+            for segment in segments:
+                if segment_id == segment.get('id'):
+                    return segment
 
     def get_traffic(self, filters=None):
         """
@@ -214,7 +230,7 @@ class Feed:
             direction = filters.get('direction')
             status = filters.get('status')
 
-            for key, highway in traffic.items():
+            for highway in traffic:
                 segments = highway.get('segments')
                 self._filter_segments_by(
                     segments,
