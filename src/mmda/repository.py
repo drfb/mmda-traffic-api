@@ -126,19 +126,18 @@ class Feed:
         if status:
             status = self._parse_status(status)
             traffic = segment.get('traffic')
-            directions = ['NB', 'SB']
             filtered_traffic = {}
 
-            for direction in directions:
+            for direction in ['NB', 'SB']:
                 traffic_direction = traffic.get(direction, {})
 
                 if traffic_direction.get('status') == status:
                     filtered_traffic[direction] = traffic_direction
 
-            if filtered_traffic:
-                segment['traffic'] = filtered_traffic
-            else:
+            if not filtered_traffic:
                 return None
+
+            segment['traffic'] = filtered_traffic
 
         return segment
 
@@ -147,13 +146,37 @@ class Feed:
         Filters a segment dict's traffic data
         by direction or status.
         """
-        for key, segment in segments.items():
-            if not self._filter_segment_by(
+        filtered_segments = []
+
+        for segment in segments:
+            if self._filter_segment_by(
                 segment,
                 direction=direction,
                 status=status
             ):
-                del segments[key]
+                filtered_segments.append(segment)
+
+        return filtered_segments
+
+    def _filter_traffic_by(self, traffic, direction=None, status=None):
+        """
+        Filters traffic data by direction or status.
+        """
+        filtered_traffic = []
+
+        for highway in traffic:
+            segments = highway.get('segments')
+            segments = self._filter_segments_by(
+                segments,
+                direction=direction,
+                status=status
+            )
+
+            if segments:
+                highway['segments'] = segments
+                filtered_traffic.append(highway)
+
+        return filtered_traffic
 
     def get_highways(self):
         """
@@ -229,14 +252,11 @@ class Feed:
         if filters:
             direction = filters.get('direction')
             status = filters.get('status')
-
-            for highway in traffic:
-                segments = highway.get('segments')
-                self._filter_segments_by(
-                    segments,
-                    direction=direction,
-                    status=status
-                )
+            traffic = self._filter_traffic_by(
+                traffic,
+                direction=direction,
+                status=status
+            )
 
         return traffic
 
