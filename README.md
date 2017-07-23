@@ -53,6 +53,10 @@ M: Moderate
 MH: Moderate to Heavy  
 H: Heavy
 
+## Development Setup
+
+Make a copy of `example.env` named `.env`. Updated `.env` file if needed.
+
 ## Acknowledgement
 
 Inspired by [Ridvan Baluyos](https://github.com/ridvanbaluyos/)' [traffic-api](https://github.com/ridvanbaluyos/traffic-api/) written in PHP.
